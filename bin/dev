@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+if !gem_spec = Gem::Specification.find_by_name("foreman")
+  system "gem install foreman"
+end
+
+exec "foreman", "start", "-f", "Procfile.dev", *ARGV

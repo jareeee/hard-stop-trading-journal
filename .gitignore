@@ -1,0 +1,38 @@
+# MacOS
+.DS_Store
+
+# Ruby/Rails
+/.bundle
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/
+!/tmp/storage/.keep
+/config/master.key
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Frontend (React)
+/client/node_modules
+/client/dist
+/client/dist-ssr
+/client/.env*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
