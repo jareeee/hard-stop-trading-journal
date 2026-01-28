@@ -193,3 +193,146 @@ a {
   font-weight: 600;
   margin-left: 0.25rem;
 }
+
+/* Onboarding & Rule Config Styles */
+.onboarding-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.onboarding-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.commitment-box {
+  background-color: rgba(220, 38, 38, 0.05);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.warning-icon {
+  color: var(--accent-red);
+  flex-shrink: 0;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.checkbox-container input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--primary-color);
+}
+
+.progress-dots {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--border-color);
+}
+
+.dot.active {
+  background-color: var(--accent-red);
+}
+
+.rule-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.rule-input-group {
+  margin-bottom: 1.5rem;
+}
+
+.number-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.number-input {
+  width: 80px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.hint-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.strategy-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--input-bg);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+}
+
+.btn-secondary {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.action-bar {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 2rem;
+  padding-bottom: 2rem;
+}

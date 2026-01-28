@@ -41,9 +41,9 @@ export const Signup = () => {
 
              // Token is handled by interceptor
             if (response.headers['authorization']) {
-                 navigate('/dashboard'); 
+                 navigate('/discipline-commitment'); 
             } else {
-                 navigate('/dashboard');
+                 navigate('/discipline-commitment');
             }
         } catch (err: any) {
             console.error(err);

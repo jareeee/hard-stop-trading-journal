@@ -41,5 +41,10 @@ module HardStopTradingJournal
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
     config.active_job.queue_adapter = :sidekiq
+
+    # Add minimal session support for Devise (API mode)
+    config.session_store :cookie_store, key: "_hardstop_session"
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use config.session_store, config.session_options
   end
 end
