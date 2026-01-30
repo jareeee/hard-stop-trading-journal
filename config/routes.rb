@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   get "/current_user", to: "current_user#show"
 
   get "/dashboard/stats", to: "dashboard#stats"
+  resources :balance_transactions, only: [ :create ]
 
   resources :strategies
   resources :rules

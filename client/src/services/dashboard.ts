@@ -44,5 +44,9 @@ export const dashboardService = {
   getStats: async (): Promise<DashboardStats> => {
     const response = await api.get('/dashboard/stats');
     return response.data;
+  },
+  createBalanceTransaction: async (payload: { transaction_type: string, amount: number, created_at?: string, note?: string }) => {
+    const response = await api.post('/balance_transactions', { balance_transaction: payload });
+    return response.data;
   }
 };

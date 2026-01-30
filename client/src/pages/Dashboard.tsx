@@ -6,6 +6,14 @@ export const Dashboard = () => {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showBalanceModal, setShowBalanceModal] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [balanceForm, setBalanceForm] = useState({
+        transaction_type: 'top_up',
+        amount: '',
+        created_at: new Date().toISOString().split('T')[0],
+        note: ''
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -35,6 +43,31 @@ export const Dashboard = () => {
             console.error('Dashboard error:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleBalanceSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            setSubmitting(true);
+            await dashboardService.createBalanceTransaction({
+                transaction_type: balanceForm.transaction_type,
+                amount: parseFloat(balanceForm.amount),
+                created_at: balanceForm.created_at,
+                note: balanceForm.note
+            });
+            setShowBalanceModal(false);
+            setBalanceForm({
+                transaction_type: 'top_up',
+                amount: '',
+                created_at: new Date().toISOString().split('T')[0],
+                note: ''
+            });
+            fetchStats(); // Refresh data
+        } catch (err: any) {
+            alert(err.response?.data?.errors?.join(', ') || err.message || 'Failed to update balance');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -271,6 +304,12 @@ export const Dashboard = () => {
                             <span className="icon-badge">💰</span>
                             Account Summary
                         </h3>
+                        <button 
+                            className="btn-primary btn-sm"
+                            onClick={() => setShowBalanceModal(true)}
+                        >
+                            + Manage Balance
+                        </button>
                     </div>
                     <div className="performance-summary">
                         <div className="summary-item">
@@ -420,6 +459,92 @@ export const Dashboard = () => {
                     </svg>
                 </div>
             </div>
+
+            {/* Manage Balance Modal */}
+            {showBalanceModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h2 className="modal-title">Manage Balance</h2>
+                            <button className="close-btn" onClick={() => setShowBalanceModal(false)}>&times;</button>
+                        </div>
+                        <form onSubmit={handleBalanceSubmit} className="modal-form">
+                            <div className="form-group">
+                                <label className="input-label">Transaction Type</label>
+                                <div className="type-toggle">
+                                    <button 
+                                        type="button"
+                                        className={`type-btn ${balanceForm.transaction_type === 'top_up' ? 'active deposit' : ''}`}
+                                        onClick={() => setBalanceForm({ ...balanceForm, transaction_type: 'top_up' })}
+                                    >
+                                        Deposit
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        className={`type-btn ${balanceForm.transaction_type === 'withdrawal' ? 'active withdraw' : ''}`}
+                                        onClick={() => setBalanceForm({ ...balanceForm, transaction_type: 'withdrawal' })}
+                                    >
+                                        Withdraw
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="input-label">Date</label>
+                                <input 
+                                    type="date" 
+                                    className="input-field" 
+                                    required
+                                    value={balanceForm.created_at}
+                                    onChange={(e) => setBalanceForm({ ...balanceForm, created_at: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="input-label">Amount (USD)</label>
+                                <input 
+                                    type="number" 
+                                    className="input-field" 
+                                    placeholder="0.00"
+                                    step="0.01"
+                                    required
+                                    value={balanceForm.amount}
+                                    onChange={(e) => setBalanceForm({ ...balanceForm, amount: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="input-label">Note (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    className="input-field" 
+                                    placeholder="Reason for adjustment..."
+                                    value={balanceForm.note}
+                                    onChange={(e) => setBalanceForm({ ...balanceForm, note: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="modal-actions">
+                                <button 
+                                    type="button" 
+                                    className="btn-secondary"
+                                    onClick={() => setShowBalanceModal(false)}
+                                    disabled={submitting}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className="btn-primary"
+                                    disabled={submitting}
+                                >
+                                    {submitting ? 'Processing...' : 'Confirm Transaction'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
