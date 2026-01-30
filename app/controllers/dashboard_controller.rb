@@ -103,7 +103,8 @@ class DashboardController < ApplicationController
       current_session: active_session ? {
         id: active_session.id,
         started_at: active_session.started_at,
-        trades_count: active_session.trades.count
+        trades_count: active_session.trades.count,
+        limits: active_session.stats
       } : nil
     }
   end

@@ -27,6 +27,12 @@ export interface DashboardStats {
       id: number;
       started_at: string;
       trades_count: number;
+      limits: {
+        trades: { current: number; max: number | null; remaining: number | null };
+        drawdown: { current: number; max: number | null; remaining: number | null };
+        losses: { current: number; max: number | null; remaining: number | null };
+        warnings: string[];
+      } | null;
     } | null;
   };
   performance_curve: {

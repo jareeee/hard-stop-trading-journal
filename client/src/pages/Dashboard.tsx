@@ -199,10 +199,10 @@ export const Dashboard = () => {
                         <span className="metric-label">PROFIT FACTOR</span>
                     </div>
                     <div className="metric-value">
-                        {stats.profit_factor.value.toFixed(2)}
+                        {Number(stats.profit_factor.value).toFixed(2)}
                     </div>
                     <div className="metric-footer">
-                        <span>Optimal: &gt;{stats.profit_factor.optimal.toFixed(1)}</span>
+                        <span>Optimal: &gt;{Number(stats.profit_factor.optimal).toFixed(1)}</span>
                         <span style={{ color: 'var(--color-primary)' }}>
                             {stats.profit_factor.percent_of_target}% of Target
                         </span>
@@ -224,7 +224,7 @@ export const Dashboard = () => {
                         <span className="metric-label">REALIZED RISK:REWARD</span>
                     </div>
                     <div className="metric-value">
-                        1:{stats.realized_risk_reward.value.toFixed(1)}
+                        1:{Number(stats.realized_risk_reward.value).toFixed(1)}
                     </div>
                     <div className="metric-footer">
                         <span className={stats.realized_risk_reward.status === 'up' ? 'trend-up' : 'trend-down'}>
@@ -245,44 +245,51 @@ export const Dashboard = () => {
                             <span className="icon-badge">📊</span>
                             Sessions
                         </h3>
-                        {stats.sessions.active && (
+                        {stats.sessions.active ? (
                             <span className="live-badge">
                                 <span className="pulse-dot"></span>
                                 LIVE SESSION
                             </span>
+                        ) : (
+                            <span className="inactive-badge">
+                                SESSION NOT ACTIVE
+                            </span>
                         )}
                     </div>
                     <div className="sessions-content">
-                        <div className="session-stat">
-                            <span className="stat-label">Total Sessions</span>
-                            <span className="stat-value">{stats.sessions.total}</span>
-                        </div>
-                        {stats.sessions.current_session && (
-                            <>
-                                <div className="session-stat">
-                                    <span className="stat-label">Current Session</span>
-                                    <span className="stat-value">#{stats.sessions.current_session.id}</span>
-                                </div>
-                                <div className="session-stat">
-                                    <span className="stat-label">Trades Today</span>
-                                    <span className="stat-value">{stats.sessions.current_session.trades_count}</span>
-                                </div>
-                                <div className="session-stat">
-                                    <span className="stat-label">Started</span>
-                                    <span className="stat-value">
-                                        {new Date(stats.sessions.current_session.started_at).toLocaleString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
+                        {stats.sessions.current_session && stats.sessions.current_session.limits && (
+                            <div className="session-limits">
+                                <div className="limit-item">
+                                    <span className="limit-label">Remaining Trades</span>
+                                    <span className={`limit-value ${stats.sessions.current_session.limits.trades.remaining !== null && stats.sessions.current_session.limits.trades.remaining <= 1 ? 'danger' : ''}`}>
+                                        {stats.sessions.current_session.limits.trades.current} / {stats.sessions.current_session.limits.trades.max ?? '∞'}
                                     </span>
                                 </div>
-                            </>
+                                <div className="limit-item">
+                                    <span className="limit-label">Total Drawdown</span>
+                                    <span className={`limit-value ${stats.sessions.current_session.limits.drawdown.remaining !== null && Number(stats.sessions.current_session.limits.drawdown.remaining) <= 0.5 ? 'danger' : ''}`}>
+                                        {Number(stats.sessions.current_session.limits.drawdown.current).toFixed(2)}% / {stats.sessions.current_session.limits.drawdown.max ?? '∞'}%
+                                    </span>
+                                </div>
+                                <div className="limit-item">
+                                    <span className="limit-label">Consecutive Losses</span>
+                                    <span className={`limit-value ${stats.sessions.current_session.limits.losses.remaining !== null && stats.sessions.current_session.limits.losses.remaining === 0 ? 'danger' : ''}`}>
+                                        {stats.sessions.current_session.limits.losses.current} / {stats.sessions.current_session.limits.losses.max ?? '∞'}
+                                    </span>
+                                </div>
+
+                                {stats.sessions.current_session.limits.warnings.length > 0 && (
+                                    <div className="session-warnings">
+                                        {stats.sessions.current_session.limits.warnings.map((warning, i) => (
+                                            <div key={i} className="warning-msg">⚠️ {warning}</div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         )}
                         {!stats.sessions.active && (
                             <div className="no-session">
-                                <p>No active session</p>
+                                <p>Session not active</p>
                                 <button className="btn-primary btn-sm">Start Session</button>
                             </div>
                         )}
@@ -324,7 +331,7 @@ export const Dashboard = () => {
                         <div className="summary-item">
                             <span className="summary-label">Max Drawdown</span>
                             <span className="summary-value" style={{ color: 'var(--color-danger)' }}>
-                                -{stats.performance_curve.max_drawdown.toFixed(2)}%
+                                -{Number(stats.performance_curve.max_drawdown).toFixed(2)}%
                             </span>
                         </div>
                         {stats.performance_curve.max_drawdown_date && (
