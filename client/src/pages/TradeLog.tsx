@@ -151,7 +151,7 @@ export const TradeLog = () => {
             {/* Left Column: Form */}
             <div className="trade-form-section">
                 <div className="form-header">
-                    <Activity size={24} color="#e5e5e5" />
+                    <TrendingUp size={24} color="#e5e5e5" />
                     <h2 style={{ fontSize: '1.25rem', color: '#e5e5e5', fontWeight: '500' }}>New Trade Entry</h2>
                 </div>
 
