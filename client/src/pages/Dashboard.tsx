@@ -7,6 +7,7 @@ export const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showBalanceModal, setShowBalanceModal] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [balanceForm, setBalanceForm] = useState({
         transaction_type: 'top_up',
@@ -157,15 +158,6 @@ export const Dashboard = () => {
         })
         .join(' ');
 
-    // Generate path for balance line (baseline)
-    const balancePath = stats.performance_curve.data
-        .map((_, index) => {
-            const x = scaleX(index);
-            const y = scaleY(stats.account_balance.starting);
-            return `${index === 0 ? 'M' : 'L'} ${x},${y}`;
-        })
-        .join(' ');
-
     return (
         <div className="dashboard-container">
             <div className="dashboard-header">
@@ -304,12 +296,21 @@ export const Dashboard = () => {
                             <span className="icon-badge">💰</span>
                             Account Summary
                         </h3>
-                        <button 
-                            className="btn-primary btn-sm"
-                            onClick={() => setShowBalanceModal(true)}
-                        >
-                            + Manage Balance
-                        </button>
+                        <div className="card-actions">
+                            <button 
+                                className="btn-secondary btn-sm"
+                                onClick={() => setShowHistoryModal(true)}
+                                style={{ marginRight: '0.5rem' }}
+                            >
+                                📜 View Log
+                            </button>
+                            <button 
+                                className="btn-primary btn-sm"
+                                onClick={() => setShowBalanceModal(true)}
+                            >
+                                + Manage Balance
+                            </button>
+                        </div>
                     </div>
                     <div className="performance-summary">
                         <div className="summary-item">
@@ -336,23 +337,18 @@ export const Dashboard = () => {
             </div>
 
             {/* Performance Curve */}
-            <div className="card chart-card">
+            <div className="card chart-card full-width">
                 <div className="card-header">
                     <h3 className="card-title">Performance Curve</h3>
-                    <p className="card-subtitle">Visualizing Equity vs. Balance (Floating Drawdown Focus)</p>
                     <div className="chart-legend">
                         <div className="legend-item">
                             <span className="legend-dot" style={{ backgroundColor: 'var(--color-primary)' }}></span>
                             <span>EQUITY</span>
                         </div>
-                        <div className="legend-item">
-                            <span className="legend-dot" style={{ backgroundColor: 'var(--color-text-tertiary)' }}></span>
-                            <span>BALANCE</span>
-                        </div>
                     </div>
                 </div>
                 <div className="chart-container">
-                    <svg width={chartWidth} height={chartHeight} className="performance-chart">
+                    <svg width={innerWidth + padding.left + padding.right} height={chartHeight} className="performance-chart">
                         <g transform={`translate(${padding.left}, ${padding.top})`}>
                             {/* Grid lines */}
                             <g className="grid">
@@ -361,95 +357,31 @@ export const Dashboard = () => {
                                     const value = maxEquity - (equityRange * ratio);
                                     return (
                                         <g key={ratio}>
-                                            <line
-                                                x1={0}
-                                                y1={y}
-                                                x2={innerWidth}
-                                                y2={y}
-                                                stroke="rgba(255,255,255,0.05)"
-                                                strokeWidth="1"
-                                            />
-                                            <text
-                                                x={-10}
-                                                y={y}
-                                                textAnchor="end"
-                                                alignmentBaseline="middle"
-                                                fill="var(--color-text-tertiary)"
-                                                fontSize="11"
-                                            >
+                                            <line x1={0} y1={y} x2={innerWidth} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                                            <text x={-10} y={y} textAnchor="end" alignmentBaseline="middle" fill="var(--color-text-tertiary)" fontSize="11">
                                                 ${value.toFixed(0)}
                                             </text>
                                         </g>
                                     );
                                 })}
                             </g>
-
-                            {/* Balance baseline (dashed) */}
-                            <path
-                                d={balancePath}
-                                fill="none"
-                                stroke="var(--color-text-tertiary)"
-                                strokeWidth="2"
-                                strokeDasharray="4 4"
-                                opacity="0.5"
-                            />
-
-                            {/* Equity curve */}
-                            <path
-                                d={equityPath}
-                                fill="none"
-                                stroke="var(--color-primary)"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-
-                            {/* Area under curve */}
-                            <path
-                                d={`${equityPath} L ${innerWidth},${innerHeight} L 0,${innerHeight} Z`}
-                                fill="url(#gradient)"
-                                opacity="0.1"
-                            />
-
+                            <path d={equityPath} fill="none" stroke="var(--color-primary)" strokeWidth="3" />
+                            <path d={`${equityPath} L ${innerWidth},${innerHeight} L 0,${innerHeight} Z`} fill="url(#gradient)" opacity="0.1" />
+                            
                             {/* X-axis labels */}
                             <g className="x-axis">
                                 {stats.performance_curve.data
                                     .filter((_, i) => i % Math.ceil(stats.performance_curve.data.length / 8) === 0)
-                                    .map((point) => {
+                                    .map((point, i) => {
                                         const originalIndex = stats.performance_curve.data.indexOf(point);
-                                        const x = scaleX(originalIndex);
                                         return (
-                                            <text
-                                                key={originalIndex}
-                                                x={x}
-                                                y={innerHeight + 20}
-                                                textAnchor="middle"
-                                                fill="var(--color-text-tertiary)"
-                                                fontSize="11"
-                                            >
+                                            <text key={i} x={scaleX(originalIndex)} y={innerHeight + 25} textAnchor="middle" fill="var(--color-text-tertiary)" fontSize="11">
                                                 {formatDate(point.date)}
                                             </text>
                                         );
                                     })}
                             </g>
-
-                            {/* Max drawdown indicator */}
-                            {stats.performance_curve.max_drawdown > 0 && (
-                                <text
-                                    x={innerWidth / 2}
-                                    y={innerHeight / 2}
-                                    textAnchor="middle"
-                                    fill="var(--color-danger)"
-                                    fontSize="13"
-                                    fontWeight="500"
-                                    opacity="0.8"
-                                >
-                                    Max Drawdown: -{stats.performance_curve.max_drawdown.toFixed(2)}%
-                                </text>
-                            )}
                         </g>
-
-                        {/* Gradient definition */}
                         <defs>
                             <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
                                 <stop offset="0%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 1 }} />
@@ -460,7 +392,7 @@ export const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Manage Balance Modal */}
+            {/* Balance Modal */}
             {showBalanceModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
@@ -542,6 +474,54 @@ export const Dashboard = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Balance History Modal */}
+            {showHistoryModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content history-modal">
+                        <div className="modal-header">
+                            <h2 className="modal-title">Balance History</h2>
+                            <button className="close-btn" onClick={() => setShowHistoryModal(false)}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="log-content">
+                                {stats.balance_history.length > 0 ? (
+                                    <div className="transaction-list">
+                                        {stats.balance_history.map((tx) => (
+                                            <div key={tx.id} className="transaction-item">
+                                                <div className="tx-info">
+                                                    <span className={`tx-type ${tx.transaction_type}`}>
+                                                        {tx.transaction_type === 'top_up' ? 'Deposit' : 
+                                                         tx.transaction_type === 'withdrawal' ? 'Withdraw' : 'Adj'}
+                                                    </span>
+                                                    <span className="tx-date">{formatDate(tx.created_at)}</span>
+                                                </div>
+                                                <div className="tx-amount-group">
+                                                    <span className={`tx-amount ${tx.transaction_type === 'top_up' ? 'positive' : 'negative'}`}>
+                                                        {tx.transaction_type === 'top_up' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                                    </span>
+                                                    <span className="tx-balance">New Bal: {formatCurrency(tx.balance_after)}</span>
+                                                </div>
+                                                {tx.note && <div className="tx-note">{tx.note}</div>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="no-data">No transactions recorded yet</div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="modal-actions full-width">
+                            <button 
+                                className="btn-secondary" 
+                                onClick={() => setShowHistoryModal(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

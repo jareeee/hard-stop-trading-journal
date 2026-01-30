@@ -10,7 +10,8 @@ class DashboardController < ApplicationController
       profit_factor: calculate_profit_factor(trades),
       realized_risk_reward: calculate_realized_rr(trades),
       sessions: calculate_sessions,
-      performance_curve: calculate_performance_curve(trades)
+      performance_curve: calculate_performance_curve(trades),
+      balance_history: current_user.balance_transactions.order(created_at: :desc).limit(10)
     }
 
     render json: stats

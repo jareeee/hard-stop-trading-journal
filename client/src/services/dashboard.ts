@@ -38,6 +38,14 @@ export interface DashboardStats {
     max_drawdown: number;
     max_drawdown_date: string | null;
   };
+  balance_history: {
+    id: number;
+    transaction_type: 'top_up' | 'withdrawal' | 'adjustment';
+    amount: number;
+    balance_after: number;
+    note: string | null;
+    created_at: string;
+  }[];
 }
 
 export const dashboardService = {
