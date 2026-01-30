@@ -4,6 +4,7 @@ import { Signup } from './pages/Signup';
 import { Dashboard } from './pages/Dashboard';
 import { DisciplineCommitment } from './pages/DisciplineCommitment';
 import { RuleConfiguration } from './pages/RuleConfiguration';
+import { TradeLog } from './pages/TradeLog';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/discipline-commitment" element={<DisciplineCommitment />} />
         <Route path="/rule-configuration" element={<RuleConfiguration />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/trade-log" element={<TradeLog />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
