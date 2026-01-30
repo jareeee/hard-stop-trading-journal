@@ -23,8 +23,7 @@ export const TradeLog = () => {
         trades_taken: 0,
         wins: 0,
         losses: 0,
-        current_drawdown: 0,
-        discipline_score: 85
+        current_drawdown: 0
     });
     const [warnings, setWarnings] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -329,10 +328,6 @@ export const TradeLog = () => {
                     <div className="stat-row">
                         <span className="stat-label">Current drawdown</span>
                         <span className="stat-value" style={{ fontSize: '1.1rem' }}>{stats.current_drawdown.toFixed(1)}%</span>
-                    </div>
-                    <div style={{ marginTop: '1rem', borderTop: '1px solid #262626', paddingTop: '1rem' }} className="stat-row">
-                        <span className="stat-label">Discipline score</span>
-                        <span className="stat-value" style={{ fontSize: '1.1rem' }}>85</span>
                     </div>
                 </div>
 

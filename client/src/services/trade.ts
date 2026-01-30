@@ -42,7 +42,6 @@ export interface TradeStats {
   wins: number;
   losses: number;
   current_drawdown: number;
-  discipline_score: number;
 }
 
 export const tradeService = {
@@ -75,8 +74,7 @@ export const tradeService = {
       trades_taken: trades.length,
       wins: trades.filter((t: any) => t.attributes?.result === 'win').length,
       losses: trades.filter((t: any) => t.attributes?.result === 'loss').length,
-      current_drawdown: 0, // Would be calculated from actual PnL
-      discipline_score: 85 // Placeholder
+      current_drawdown: 0 // Would be calculated from actual PnL
     };
     
     return stats;
