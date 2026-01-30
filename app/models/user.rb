@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :strategies, dependent: :destroy
   has_many :sessions, dependent: :destroy
   has_many :trades, through: :sessions
+  has_many :balance_transactions, dependent: :destroy
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
