@@ -314,14 +314,12 @@ export const Dashboard = () => {
                             <button 
                                 className="btn-secondary btn-sm"
                                 onClick={() => setShowHistoryModal(true)}
-                                style={{ marginRight: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <History size={14} /> View Log
                             </button>
                             <button 
                                 className="btn-primary btn-sm"
                                 onClick={() => setShowBalanceModal(true)}
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <Plus size={14} /> Manage Balance
                             </button>
