@@ -69,7 +69,7 @@ export const Login = () => {
                             <input 
                                 type={showPassword ? "text" : "password"} 
                                 className="input-field" 
-                                placeholder="••••••••" 
+                                placeholder="********" 
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dashboardService, type DashboardStats } from '../services/dashboard';
+import { AlertTriangle, TrendingUp, TrendingDown, BarChart2, Wallet, History, Plus, ScrollText } from 'lucide-react';
 
 export const Dashboard = () => {
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -99,7 +100,10 @@ export const Dashboard = () => {
                     </div>
                 </div>
                 <div className="error-state">
-                    <p className="error-message">⚠️ {error || 'Failed to load dashboard'}</p>
+                    <p className="error-message">
+                        <AlertTriangle size={20} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+                        {error || 'Failed to load dashboard'}
+                    </p>
                     <button onClick={fetchStats} className="btn-retry">Retry</button>
                 </div>
             </div>
@@ -135,14 +139,14 @@ export const Dashboard = () => {
     const innerHeight = chartHeight - padding.top - padding.bottom;
 
     // Get min and max values for scaling
-    const equityValues = stats.performance_curve.data.map(d => d.equity);
+    const equityValues = stats.performance_curve.data.map(d => Number(d.equity));
     const minEquity = Math.min(...equityValues);
     const maxEquity = Math.max(...equityValues);
-    const equityRange = maxEquity - minEquity;
+    const equityRange = maxEquity - minEquity || 100;
 
     // Scale functions
     const scaleX = (index: number) => {
-        return (index / (stats.performance_curve.data.length - 1)) * innerWidth;
+        return (index / (stats.performance_curve.data.length - 1 || 1)) * innerWidth;
     };
 
     const scaleY = (value: number) => {
@@ -153,7 +157,7 @@ export const Dashboard = () => {
     const equityPath = stats.performance_curve.data
         .map((point, index) => {
             const x = scaleX(index);
-            const y = scaleY(point.equity);
+            const y = scaleY(Number(point.equity));
             return `${index === 0 ? 'M' : 'L'} ${x},${y}`;
         })
         .join(' ');
@@ -228,7 +232,7 @@ export const Dashboard = () => {
                     </div>
                     <div className="metric-footer">
                         <span className={stats.realized_risk_reward.status === 'up' ? 'trend-up' : 'trend-down'}>
-                            {stats.realized_risk_reward.status === 'up' ? '↗' : '↘'} 
+                            {stats.realized_risk_reward.status === 'up' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                             {' '}
                             {stats.realized_risk_reward.status === 'up' ? 'Up' : 'Down'} {Math.abs(stats.realized_risk_reward.deviation_percent)}% from historical average
                         </span>
@@ -242,7 +246,7 @@ export const Dashboard = () => {
                 <div className="card sessions-card">
                     <div className="card-header">
                         <h3 className="card-title">
-                            <span className="icon-badge">📊</span>
+                            <span className="icon-badge"><BarChart2 size={18} /></span>
                             Sessions
                         </h3>
                         {stats.sessions.active ? (
@@ -262,26 +266,29 @@ export const Dashboard = () => {
                                 <div className="limit-item">
                                     <span className="limit-label">Remaining Trades</span>
                                     <span className={`limit-value ${stats.sessions.current_session.limits.trades.remaining !== null && stats.sessions.current_session.limits.trades.remaining <= 1 ? 'danger' : ''}`}>
-                                        {stats.sessions.current_session.limits.trades.current} / {stats.sessions.current_session.limits.trades.max ?? '∞'}
+                                        {stats.sessions.current_session.limits.trades.current} / {stats.sessions.current_session.limits.trades.max ?? 'All'}
                                     </span>
                                 </div>
                                 <div className="limit-item">
                                     <span className="limit-label">Total Drawdown</span>
                                     <span className={`limit-value ${stats.sessions.current_session.limits.drawdown.remaining !== null && Number(stats.sessions.current_session.limits.drawdown.remaining) <= 0.5 ? 'danger' : ''}`}>
-                                        {Number(stats.sessions.current_session.limits.drawdown.current).toFixed(2)}% / {stats.sessions.current_session.limits.drawdown.max ?? '∞'}%
+                                        {Number(stats.sessions.current_session.limits.drawdown.current).toFixed(2)}% / {stats.sessions.current_session.limits.drawdown.max ?? 'All'}%
                                     </span>
                                 </div>
                                 <div className="limit-item">
                                     <span className="limit-label">Consecutive Losses</span>
                                     <span className={`limit-value ${stats.sessions.current_session.limits.losses.remaining !== null && stats.sessions.current_session.limits.losses.remaining === 0 ? 'danger' : ''}`}>
-                                        {stats.sessions.current_session.limits.losses.current} / {stats.sessions.current_session.limits.losses.max ?? '∞'}
+                                        {stats.sessions.current_session.limits.losses.current} / {stats.sessions.current_session.limits.losses.max ?? 'All'}
                                     </span>
                                 </div>
 
                                 {stats.sessions.current_session.limits.warnings.length > 0 && (
                                     <div className="session-warnings">
                                         {stats.sessions.current_session.limits.warnings.map((warning, i) => (
-                                            <div key={i} className="warning-msg">⚠️ {warning}</div>
+                                            <div key={i} className="warning-msg">
+                                                <AlertTriangle size={14} style={{ marginRight: '6px' }} />
+                                                {warning}
+                                            </div>
                                         ))}
                                     </div>
                                 )}
@@ -300,22 +307,23 @@ export const Dashboard = () => {
                 <div className="card performance-summary-card">
                     <div className="card-header">
                         <h3 className="card-title">
-                            <span className="icon-badge">💰</span>
+                            <span className="icon-badge"><Wallet size={18} /></span>
                             Account Summary
                         </h3>
                         <div className="card-actions">
                             <button 
                                 className="btn-secondary btn-sm"
                                 onClick={() => setShowHistoryModal(true)}
-                                style={{ marginRight: '0.5rem' }}
+                                style={{ marginRight: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
-                                📜 View Log
+                                <History size={14} /> View Log
                             </button>
                             <button 
                                 className="btn-primary btn-sm"
                                 onClick={() => setShowBalanceModal(true)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
-                                + Manage Balance
+                                <Plus size={14} /> Manage Balance
                             </button>
                         </div>
                     </div>
@@ -490,7 +498,12 @@ export const Dashboard = () => {
                 <div className="modal-overlay">
                     <div className="modal-content history-modal">
                         <div className="modal-header">
-                            <h2 className="modal-title">Balance History</h2>
+                            <h2 className="modal-title">
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <ScrollText size={24} color="var(--color-primary)" />
+                                    Balance History
+                                </span>
+                            </h2>
                             <button className="close-btn" onClick={() => setShowHistoryModal(false)}>&times;</button>
                         </div>
                         <div className="modal-body">

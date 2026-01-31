@@ -17,7 +17,7 @@ export const DisciplineCommitment = () => {
                 <p>It helps you stop losing money from emotional decisions.</p>
             </div>
 
-            <div style={{ margin: '1rem 0', color: '#333' }}>○</div>
+            <div style={{ margin: '1rem 0', color: '#333' }}>|</div>
 
             <div className="onboarding-card">
                 <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', textAlign: 'center' }}>Discipline Commitment</h2>

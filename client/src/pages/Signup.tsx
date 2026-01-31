@@ -110,7 +110,7 @@ export const Signup = () => {
                             <input 
                                 type={showPassword ? "text" : "password"} 
                                 className="input-field" 
-                                placeholder="••••••••" 
+                                placeholder="********" 
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -130,7 +130,7 @@ export const Signup = () => {
                             <input 
                                 type={showConfirmPassword ? "text" : "password"} 
                                 className="input-field" 
-                                placeholder="••••••••" 
+                                placeholder="********" 
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
