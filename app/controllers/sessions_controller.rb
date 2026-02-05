@@ -15,7 +15,9 @@ class SessionsController < ApplicationController
     # Check if there is already an active session
     active_session = Session.current_for(current_user)
     if active_session
-      render json: SessionSerializer.new(active_session).serializable_hash
+      # Return the existing active session, indicating via header that no new session was created
+      response.set_header("X-Existing-Session", "true")
+      render json: SessionSerializer.new(active_session).serializable_hash, status: :ok
       return
     end
 
