@@ -36,17 +36,23 @@ class SessionsController < ApplicationController
       session.rule = latest_rule if latest_rule
     end
 
-    if session.save
-      # Handle strategy associations if provided
-      if session_params[:strategy_ids].present?
-        strategy_ids = session_params[:strategy_ids]
-        strategies = current_user.strategies.where(id: strategy_ids)
-        session.strategies << strategies if strategies.any?
+    begin
+      ActiveRecord::Base.transaction do
+        session.save!
+
+        # Handle strategy associations if provided
+        if session_params[:strategy_ids].present?
+          strategy_ids = session_params[:strategy_ids]
+          strategies = current_user.strategies.where(id: strategy_ids)
+          session.strategies << strategies if strategies.any?
+        end
       end
 
       render json: SessionSerializer.new(session).serializable_hash, status: :created
-    else
-      render json: { errors: session.errors.full_messages }, status: :unprocessable_entity
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
+      errors = session.errors.full_messages
+      errors = [e.message] if errors.empty?
+      render json: { errors: errors }, status: :unprocessable_entity
     end
   end
 
