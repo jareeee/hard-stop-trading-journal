@@ -16,6 +16,7 @@ export interface SessionData {
   ended_at?: string;
   trade_count?: number;
   rule?: SessionRule;
+  strategies?: Array<{ id: number; name: string }>;
 }
 
 export interface SessionStats {
@@ -92,7 +93,8 @@ export const sessionService = {
       started_at: activeSession.attributes.started_at,
       ended_at: activeSession.attributes.ended_at,
       trade_count: activeSession.attributes.trade_count || 0,
-      rule: activeSession.attributes.rule
+      rule: activeSession.attributes.rule,
+      strategies: activeSession.attributes.strategies || []
     };
   },
 

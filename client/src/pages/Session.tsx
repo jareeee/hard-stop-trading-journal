@@ -79,7 +79,8 @@ export const Session = () => {
           started_at: activeSession.attributes.started_at,
           ended_at: activeSession.attributes.ended_at,
           trade_count: activeSession.attributes.trade_count || 0,
-          rule: activeSession.attributes.rule
+          rule: activeSession.attributes.rule,
+          strategies: activeSession.attributes.strategies || []
         };
         setCurrentSession(sessionData);
         setStep('active');
@@ -163,7 +164,8 @@ export const Session = () => {
           status: session.attributes.status,
           started_at: session.attributes.started_at,
           trade_count: 0,
-          rule: session.attributes.rule
+          rule: session.attributes.rule,
+          strategies: session.attributes.strategies || []
         });
         setStep('active');
         await loadSessionStats(parseInt(session.id));
@@ -295,7 +297,7 @@ export const Session = () => {
               </div>
               {sessionStats?.drawdown.remaining !== null && sessionStats?.drawdown.remaining !== undefined && (
                 <div className="stat-remaining">
-                  {sessionStats.drawdown.remaining.toFixed(2)}% buffer left
+                  {sessionStats.drawdown.remaining}% buffer left
                 </div>
               )}
             </div>

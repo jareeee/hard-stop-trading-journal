@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, AlertTriangle, TrendingUp, TrendingDown, Calendar, Play } from 'lucide-react';
 import { tradeService } from '../services/trade';
-import { strategyService } from '../services/strategy';
 import { sessionService, type SessionData } from '../services/session';
 import type { Strategy } from '../services/strategy';
 
@@ -58,10 +57,16 @@ export const TradeLog = () => {
                 return;
             }
 
-            // Load strategies
-            const stratResponse = await strategyService.getAll();
-            if (stratResponse.data) {
-                setStrategies(stratResponse.data.filter((s: Strategy) => s.is_active));
+            // Use strategies from the session (only strategies selected during session creation)
+            if (session.strategies && session.strategies.length > 0) {
+                const sessionStrategies = session.strategies.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    description: undefined,
+                    is_active: true,
+                    created_at: new Date().toISOString() // Not needed for display
+                }));
+                setStrategies(sessionStrategies);
             }
 
             // Load stats
