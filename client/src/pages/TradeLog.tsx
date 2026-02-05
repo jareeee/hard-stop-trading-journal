@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Activity, Shield, AlertTriangle, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Shield, AlertTriangle, TrendingUp, TrendingDown, Calendar, Play } from 'lucide-react';
 import { tradeService } from '../services/trade';
 import { strategyService } from '../services/strategy';
-import { sessionService } from '../services/session';
+import { sessionService, type SessionData } from '../services/session';
 import type { Strategy } from '../services/strategy';
 
 export const TradeLog = () => {
+    const navigate = useNavigate();
+    
+    // Session state
+    const [currentSession, setCurrentSession] = useState<SessionData | null>(null);
+    const [sessionLoading, setSessionLoading] = useState(true);
+    
     // Form states
     const [direction, setDirection] = useState<'long' | 'short'>('long');
     const [asset, setAsset] = useState('BTCUSDT');
@@ -39,6 +46,18 @@ export const TradeLog = () => {
 
     const loadInitialData = async () => {
         try {
+            setSessionLoading(true);
+            
+            // Check for active session FIRST
+            const session = await sessionService.getCurrent();
+            setCurrentSession(session);
+            
+            if (!session) {
+                // No active session - user must start one first
+                setSessionLoading(false);
+                return;
+            }
+
             // Load strategies
             const stratResponse = await strategyService.getAll();
             if (stratResponse.data) {
@@ -48,14 +67,10 @@ export const TradeLog = () => {
             // Load stats
             const statsData = await tradeService.getStats();
             setStats(statsData);
-
-            // Ensure there's an active session
-            const currentSession = await sessionService.getCurrent();
-            if (!currentSession) {
-                await sessionService.create();
-            }
         } catch (err) {
             console.error('Failed to load initial data:', err);
+        } finally {
+            setSessionLoading(false);
         }
     };
 
@@ -109,6 +124,12 @@ export const TradeLog = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!currentSession) {
+            setError('No active session. Please start a session first.');
+            return;
+        }
+        
         setLoading(true);
         setError('');
 
@@ -145,6 +166,43 @@ export const TradeLog = () => {
             setLoading(false);
         }
     };
+
+    // Show loading state while checking session
+    if (sessionLoading) {
+        return (
+            <div className="trade-container" style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <p>Checking session status...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // No active session - show message to start session
+    if (!currentSession) {
+        return (
+            <div className="trade-container" style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <div className="no-session-message">
+                    <div className="no-session-icon">
+                        <Play size={48} />
+                    </div>
+                    <h2 className="no-session-title">No Active Session</h2>
+                    <p className="no-session-text">
+                        You need to start a trading session before you can log trades. 
+                        Sessions help enforce your trading rules and track your progress.
+                    </p>
+                    <button 
+                        className="btn-start-session-prompt"
+                        onClick={() => navigate('/session')}
+                    >
+                        <Play size={20} />
+                        Start New Session
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="trade-container">

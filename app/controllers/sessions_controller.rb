@@ -1,9 +1,9 @@
 class SessionsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_session, only: %i[show update]
+  before_action :set_session, only: %i[show update stats]
 
   def index
-    sessions = current_user.sessions.order(started_at: :desc)
+    sessions = current_user.sessions.includes(:rule, :trades).order(started_at: :desc)
     render json: SessionSerializer.new(sessions).serializable_hash
   end
 
@@ -12,23 +12,36 @@ class SessionsController < ApplicationController
   end
 
   def create
-    # Only allow one active session per user for simplicity, or just create a new one.
-    # Logic: if there is an active session, return it? Or error?
-    # For now, let's just create a new one.
-
+    # Check if there is already an active session
     active_session = Session.current_for(current_user)
     if active_session
-       render json: SessionSerializer.new(active_session).serializable_hash
-       return
+      render json: SessionSerializer.new(active_session).serializable_hash
+      return
     end
 
-    session = current_user.sessions.build(started_at: Time.current, status: "active")
+    session = current_user.sessions.build(
+      started_at: Time.current,
+      status: "active"
+    )
 
-    # Associate mostly recently created rule if exists
-    latest_rule = current_user.rules.last
-    session.rule = latest_rule if latest_rule
+    # Handle rule_id from params or use latest rule
+    if session_params[:rule_id].present?
+      rule = current_user.rules.find_by(id: session_params[:rule_id])
+      session.rule = rule if rule
+    else
+      # Fallback to most recent rule
+      latest_rule = current_user.rules.order(created_at: :desc).first
+      session.rule = latest_rule if latest_rule
+    end
 
     if session.save
+      # Handle strategy associations if provided
+      if session_params[:strategy_ids].present?
+        strategy_ids = session_params[:strategy_ids]
+        strategies = current_user.strategies.where(id: strategy_ids)
+        session.strategies << strategies if strategies.any?
+      end
+
       render json: SessionSerializer.new(session).serializable_hash, status: :created
     else
       render json: { errors: session.errors.full_messages }, status: :unprocessable_entity
@@ -36,11 +49,17 @@ class SessionsController < ApplicationController
   end
 
   def update
-    if @session.update(session_params)
+    if @session.update(update_session_params)
       render json: SessionSerializer.new(@session).serializable_hash
     else
       render json: { errors: @session.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  # GET /sessions/:id/stats
+  # Returns real-time stats for the session including trades, drawdown, and warnings
+  def stats
+    render json: @session.stats
   end
 
   private
@@ -50,6 +69,10 @@ class SessionsController < ApplicationController
   end
 
   def session_params
+    params.require(:session).permit(:rule_id, strategy_ids: [])
+  end
+
+  def update_session_params
     params.require(:session).permit(:status, :ended_at)
   end
 end

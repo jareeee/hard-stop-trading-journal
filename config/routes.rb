@@ -18,7 +18,11 @@ Rails.application.routes.draw do
 
   resources :strategies
   resources :rules
-  resources :sessions
+  resources :sessions do
+    member do
+      get :stats
+    end
+  end
   resources :trades
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
