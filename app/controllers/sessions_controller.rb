@@ -3,7 +3,7 @@ class SessionsController < ApplicationController
   before_action :set_session, only: %i[show update stats]
 
   def index
-    sessions = current_user.sessions.includes(:rule, :trades).order(started_at: :desc)
+    sessions = current_user.sessions.includes(:rule).order(started_at: :desc)
     render json: SessionSerializer.new(sessions).serializable_hash
   end
 
