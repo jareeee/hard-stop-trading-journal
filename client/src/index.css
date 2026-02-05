@@ -2351,3 +2351,180 @@ select.input-field {
     transform: rotate(360deg);
   }
 }
+/* ========================================
+   SESSION TRADES LIST STYLES
+   ======================================== */
+
+.session-trades-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.trades-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.trades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.trades-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trades-list::-webkit-scrollbar-track {
+  background: var(--input-bg);
+  border-radius: 3px;
+}
+
+.trades-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.trades-list::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+.trade-item {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s;
+}
+
+.trade-item:hover {
+  border-color: #404040;
+  background-color: #1f1f1f;
+}
+
+.trade-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.trade-asset-direction {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trade-asset {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.trade-direction {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.trade-direction.long {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.trade-direction.short {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.trade-strategy-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.trade-item-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.trade-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.trade-detail-label {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.trade-detail-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.trade-detail-value.profit {
+  color: #10b981;
+}
+
+.trade-detail-value.loss {
+  color: #ef4444;
+}
+
+.trade-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.trade-timestamp {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.trade-result {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.trade-result.win {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.trade-result.loss {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.trade-result.breakeven {
+  background-color: rgba(115, 115, 115, 0.1);
+  color: #737373;
+}

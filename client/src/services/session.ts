@@ -9,6 +9,24 @@ export interface SessionRule {
   enforce_strategy?: boolean;
 }
 
+export interface SessionTrade {
+  id: number;
+  asset: string;
+  direction: 'long' | 'short';
+  entry_price: string;
+  stop_loss?: string;
+  target_price?: string;
+  close_price?: string;
+  risk_percent?: string;
+  pnl_gross?: string;
+  pnl_net?: string;
+  fee?: string;
+  result?: string;
+  opened_at: string;
+  closed_at?: string;
+  strategy?: { id: number; name: string };
+}
+
 export interface SessionData {
   id: number;
   status: 'active' | 'ended';
@@ -17,6 +35,7 @@ export interface SessionData {
   trade_count?: number;
   rule?: SessionRule;
   strategies?: Array<{ id: number; name: string }>;
+  trades?: SessionTrade[];
 }
 
 export interface SessionStats {
@@ -94,7 +113,8 @@ export const sessionService = {
       ended_at: activeSession.attributes.ended_at,
       trade_count: activeSession.attributes.trade_count || 0,
       rule: activeSession.attributes.rule,
-      strategies: activeSession.attributes.strategies || []
+      strategies: activeSession.attributes.strategies || [],
+      trades: activeSession.attributes.trades || []
     };
   },
 

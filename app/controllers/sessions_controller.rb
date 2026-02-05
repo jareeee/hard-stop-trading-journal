@@ -3,7 +3,9 @@ class SessionsController < ApplicationController
   before_action :set_session, only: %i[show update stats]
 
   def index
-    sessions = current_user.sessions.includes(:rule).order(started_at: :desc)
+    sessions = current_user.sessions
+      .includes(:rule, :strategies, trades: :strategy)
+      .order(started_at: :desc)
     render json: SessionSerializer.new(sessions).serializable_hash
   end
 
@@ -51,7 +53,7 @@ class SessionsController < ApplicationController
       render json: SessionSerializer.new(session).serializable_hash, status: :created
     rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
       errors = session.errors.full_messages
-      errors = [e.message] if errors.empty?
+      errors = [ e.message ] if errors.empty?
       render json: { errors: errors }, status: :unprocessable_entity
     end
   end
@@ -73,7 +75,9 @@ class SessionsController < ApplicationController
   private
 
   def set_session
-    @session = current_user.sessions.find(params[:id])
+    @session = current_user.sessions
+      .includes(:rule, :strategies, trades: :strategy)
+      .find(params[:id])
   end
 
   def session_params

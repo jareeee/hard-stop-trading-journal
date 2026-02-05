@@ -8,6 +8,7 @@ import {
   Clock, 
   Target, 
   TrendingDown,
+  TrendingUp,
   Zap,
   ArrowRight,
   XCircle,
@@ -80,7 +81,8 @@ export const Session = () => {
           ended_at: activeSession.attributes.ended_at,
           trade_count: activeSession.attributes.trade_count || 0,
           rule: activeSession.attributes.rule,
-          strategies: activeSession.attributes.strategies || []
+          strategies: activeSession.attributes.strategies || [],
+          trades: activeSession.attributes.trades || []
         };
         setCurrentSession(sessionData);
         setStep('active');
@@ -165,7 +167,8 @@ export const Session = () => {
           started_at: session.attributes.started_at,
           trade_count: 0,
           rule: session.attributes.rule,
-          strategies: session.attributes.strategies || []
+          strategies: session.attributes.strategies || [],
+          trades: session.attributes.trades || []
         });
         setStep('active');
         await loadSessionStats(parseInt(session.id));
@@ -370,6 +373,79 @@ export const Session = () => {
                   <span className="rule-value">{currentSession.rule.max_consecutive_losses}</span>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Trades List */}
+        {currentSession.trades && currentSession.trades.length > 0 && (
+          <div className="session-trades-card">
+            <div className="trades-header">
+              <BarChart3 size={20} />
+              <span>Session Trades ({currentSession.trades.length})</span>
+            </div>
+            <div className="trades-list">
+              {currentSession.trades.map((trade) => (
+                <div key={trade.id} className="trade-item">
+                  <div className="trade-item-header">
+                    <div className="trade-asset-direction">
+                      {trade.direction === 'long' ? (
+                        <TrendingUp size={18} color="#10b981" />
+                      ) : (
+                        <TrendingDown size={18} color="#ef4444" />
+                      )}
+                      <span className="trade-asset">{trade.asset}</span>
+                      <span className={`trade-direction ${trade.direction}`}>
+                        {trade.direction.toUpperCase()}
+                      </span>
+                    </div>
+                    {trade.strategy && (
+                      <span className="trade-strategy-badge">{trade.strategy.name}</span>
+                    )}
+                  </div>
+                  <div className="trade-item-details">
+                    <div className="trade-detail-row">
+                      <span className="trade-detail-label">Entry:</span>
+                      <span className="trade-detail-value">${parseFloat(trade.entry_price).toLocaleString()}</span>
+                    </div>
+                    {trade.stop_loss && (
+                      <div className="trade-detail-row">
+                        <span className="trade-detail-label">Stop Loss:</span>
+                        <span className="trade-detail-value">${parseFloat(trade.stop_loss).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {trade.target_price && (
+                      <div className="trade-detail-row">
+                        <span className="trade-detail-label">Target:</span>
+                        <span className="trade-detail-value">${parseFloat(trade.target_price).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {trade.pnl_net && (
+                      <div className="trade-detail-row">
+                        <span className="trade-detail-label">P&L:</span>
+                        <span className={`trade-detail-value ${parseFloat(trade.pnl_net) >= 0 ? 'profit' : 'loss'}`}>
+                          ${parseFloat(trade.pnl_net).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="trade-item-footer">
+                    <span className="trade-timestamp">
+                      {new Date(trade.opened_at).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                    {trade.result && (
+                      <span className={`trade-result ${trade.result}`}>
+                        {trade.result}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
