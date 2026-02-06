@@ -12,6 +12,7 @@ import {
   Zap,
   ArrowRight,
   XCircle,
+  X,
   Plus,
   BarChart3,
   History
@@ -19,6 +20,7 @@ import {
 import { sessionService, type SessionData, type SessionStats } from '../services/session';
 import { ruleService, type Rule } from '../services/rule';
 import { strategyService, type Strategy } from '../services/strategy';
+import { tradeService } from '../services/trade';
 
 // Step types for the wizard
 type WizardStep = 'overview' | 'rules' | 'confirmation' | 'active';
@@ -54,6 +56,11 @@ export const Session = () => {
   
   // Confirmation checkbox
   const [confirmed, setConfirmed] = useState(false);
+
+  // Trade Management State
+  const [selectedTradeForClose, setSelectedTradeForClose] = useState<number | null>(null);
+  const [closePrice, setClosePrice] = useState('');
+  const [closingTrade, setClosingTrade] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -197,6 +204,56 @@ export const Session = () => {
       setError('Failed to end session');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleOpenCloseTradeModal = (tradeId: number) => {
+    setSelectedTradeForClose(tradeId);
+    setClosePrice('');
+  };
+
+  const handleCloseModal = () => {
+    setSelectedTradeForClose(null);
+    setClosePrice('');
+  };
+
+  const handleCloseTrade = async () => {
+    if (!closePrice || !selectedTradeForClose || !currentSession) return;
+
+    try {
+      setClosingTrade(true);
+      await tradeService.update(selectedTradeForClose, {
+        trade: {
+          close_price: parseFloat(closePrice),
+          closed_at: new Date().toISOString()
+        } as any
+      });
+
+      // Reload session data to get updated trades
+      const sessions = await sessionService.getAll();
+      const activeSession = sessions?.data?.find((s: any) => s.attributes?.status === 'active');
+      
+      if (activeSession) {
+        setCurrentSession({
+          id: parseInt(activeSession.id),
+          status: activeSession.attributes.status,
+          started_at: activeSession.attributes.started_at,
+          ended_at: activeSession.attributes.ended_at,
+          trade_count: activeSession.attributes.trade_count || 0,
+          rule: activeSession.attributes.rule,
+          strategies: activeSession.attributes.strategies || [],
+          trades: activeSession.attributes.trades || []
+        });
+      }
+
+      // Close modal and reload stats
+      handleCloseModal();
+      await loadSessionStats(currentSession.id);
+    } catch (err) {
+      console.error('Failed to close trade:', err);
+      setError('Failed to close trade');
+    } finally {
+      setClosingTrade(false);
     }
   };
 
@@ -385,67 +442,87 @@ export const Session = () => {
               <span>Session Trades ({currentSession.trades.length})</span>
             </div>
             <div className="trades-list">
-              {currentSession.trades.map((trade) => (
-                <div key={trade.id} className="trade-item">
-                  <div className="trade-item-header">
-                    <div className="trade-asset-direction">
-                      {trade.direction === 'long' ? (
-                        <TrendingUp size={18} color="#10b981" />
-                      ) : (
-                        <TrendingDown size={18} color="#ef4444" />
-                      )}
-                      <span className="trade-asset">{trade.asset}</span>
-                      <span className={`trade-direction ${trade.direction}`}>
-                        {trade.direction.toUpperCase()}
-                      </span>
-                    </div>
-                    {trade.strategy && (
-                      <span className="trade-strategy-badge">{trade.strategy.name}</span>
-                    )}
-                  </div>
-                  <div className="trade-item-details">
-                    <div className="trade-detail-row">
-                      <span className="trade-detail-label">Entry:</span>
-                      <span className="trade-detail-value">${parseFloat(trade.entry_price).toLocaleString()}</span>
-                    </div>
-                    {trade.stop_loss && (
-                      <div className="trade-detail-row">
-                        <span className="trade-detail-label">Stop Loss:</span>
-                        <span className="trade-detail-value">${parseFloat(trade.stop_loss).toLocaleString()}</span>
-                      </div>
-                    )}
-                    {trade.target_price && (
-                      <div className="trade-detail-row">
-                        <span className="trade-detail-label">Target:</span>
-                        <span className="trade-detail-value">${parseFloat(trade.target_price).toLocaleString()}</span>
-                      </div>
-                    )}
-                    {trade.pnl_net && (
-                      <div className="trade-detail-row">
-                        <span className="trade-detail-label">P&L:</span>
-                        <span className={`trade-detail-value ${parseFloat(trade.pnl_net) >= 0 ? 'profit' : 'loss'}`}>
-                          ${parseFloat(trade.pnl_net).toLocaleString()}
+              {currentSession.trades.map((trade) => {
+                const isClosed = !!trade.close_price;
+                
+                return (
+                  <div 
+                    key={trade.id} 
+                    className={`trade-item ${!isClosed ? 'clickable' : ''}`}
+                    onClick={() => !isClosed && handleOpenCloseTradeModal(trade.id)}
+                    style={{ cursor: isClosed ? 'default' : 'pointer' }}
+                  >
+                    <div className="trade-item-header">
+                      <div className="trade-asset-direction">
+                        {trade.direction === 'long' ? (
+                          <TrendingUp size={18} color="#10b981" />
+                        ) : (
+                          <TrendingDown size={18} color="#ef4444" />
+                        )}
+                        <span className="trade-asset">{trade.asset}</span>
+                        <span className={`trade-direction ${trade.direction}`}>
+                          {trade.direction.toUpperCase()}
                         </span>
+                        {isClosed && (
+                          <span className="trade-closed-badge">CLOSED</span>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="trade-item-footer">
-                    <span className="trade-timestamp">
-                      {new Date(trade.opened_at).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
-                    {trade.result && (
-                      <span className={`trade-result ${trade.result}`}>
-                        {trade.result}
+                      {trade.strategy && (
+                        <span className="trade-strategy-badge">{trade.strategy.name}</span>
+                      )}
+                    </div>
+                    
+                    <div className="trade-item-details">
+                      <div className="trade-detail-row">
+                        <span className="trade-detail-label">Entry:</span>
+                        <span className="trade-detail-value">${parseFloat(trade.entry_price).toLocaleString()}</span>
+                      </div>
+                      {trade.stop_loss && (
+                        <div className="trade-detail-row">
+                          <span className="trade-detail-label">Stop Loss:</span>
+                          <span className="trade-detail-value">${parseFloat(trade.stop_loss).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {trade.target_price && (
+                        <div className="trade-detail-row">
+                          <span className="trade-detail-label">Target:</span>
+                          <span className="trade-detail-value">${parseFloat(trade.target_price).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {trade.close_price && (
+                        <div className="trade-detail-row">
+                          <span className="trade-detail-label">Close:</span>
+                          <span className="trade-detail-value">${parseFloat(trade.close_price).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {trade.pnl_net && (
+                        <div className="trade-detail-row">
+                          <span className="trade-detail-label">P&L:</span>
+                          <span className={`trade-detail-value ${parseFloat(trade.pnl_net) >= 0 ? 'profit' : 'loss'}`}>
+                            ${parseFloat(trade.pnl_net).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="trade-item-footer">
+                      <span className="trade-timestamp">
+                        {new Date(trade.opened_at).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </span>
-                    )}
+                      {trade.result && (
+                        <span className={`trade-result ${trade.result}`}>
+                          {trade.result}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -473,6 +550,75 @@ export const Session = () => {
           <div className="session-error">
             <AlertTriangle size={16} />
             {error}
+          </div>
+        )}
+
+        {/* Close Trade Modal */}
+        {selectedTradeForClose && (
+          <div className="modal-overlay" onClick={handleCloseModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Close Trade</h3>
+                <button className="modal-close-btn" onClick={handleCloseModal}>
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="modal-body">
+                {currentSession.trades?.find(t => t.id === selectedTradeForClose) && (() => {
+                  const trade = currentSession.trades.find(t => t.id === selectedTradeForClose)!;
+                  return (
+                    <div className="trade-summary">
+                      <div className="trade-summary-row">
+                        <span className="label">Asset:</span>
+                        <span className="value">{trade.asset}</span>
+                      </div>
+                      <div className="trade-summary-row">
+                        <span className="label">Direction:</span>
+                        <span className={`value ${trade.direction}`}>
+                          {trade.direction.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="trade-summary-row">
+                        <span className="label">Entry Price:</span>
+                        <span className="value">${parseFloat(trade.entry_price).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <div className="modal-input-group">
+                  <label className="input-label">Close Price *</label>
+                  <input
+                    type="number"
+                    step="any"
+                    className="input-field"
+                    placeholder="Enter close price"
+                    value={closePrice}
+                    onChange={(e) => setClosePrice(e.target.value)}
+                    disabled={closingTrade}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button 
+                  className="btn-secondary" 
+                  onClick={handleCloseModal}
+                  disabled={closingTrade}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="btn-primary" 
+                  onClick={handleCloseTrade}
+                  disabled={!closePrice || closingTrade}
+                >
+                  {closingTrade ? 'Closing...' : 'Close Trade'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

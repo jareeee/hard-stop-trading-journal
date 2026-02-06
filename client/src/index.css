@@ -2528,3 +2528,245 @@ select.input-field {
   background-color: rgba(115, 115, 115, 0.1);
   color: #737373;
 }
+
+/* ========================================
+   TRADE CLOSE SECTION STYLES
+   ======================================== */
+
+.trade-item.expanded {
+  border-color: #60a5fa;
+  background-color: #1f1f1f;
+}
+
+.trade-item-header.clickable:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.trade-closed-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(115, 115, 115, 0.2);
+  color: #a3a3a3;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-left: 0.5rem;
+}
+
+.trade-close-section {
+  padding: 1rem;
+  margin-top: 0.75rem;
+  background-color: rgba(59, 130, 246, 0.05);
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 0 0 8px 8px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+  }
+}
+
+.trade-close-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trade-close-input-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.trade-close-input-group .input-field {
+  flex: 1;
+  padding: 0.75rem;
+}
+
+.btn-close-trade {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-close-trade:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-close-trade:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-close-trade:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   MODAL POPUP STYLES
+   ======================================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.trade-summary {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.trade-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.trade-summary-row:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.trade-summary-row .label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.trade-summary-row .value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.trade-summary-row .value.long {
+  color: #10b981;
+}
+
+.trade-summary-row .value.short {
+  color: #ef4444;
+}
+
+.modal-input-group {
+  margin-bottom: 1rem;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  justify-content: flex-end;
+}
+
+.modal-footer .btn-secondary,
+.modal-footer .btn-primary {
+  min-width: 100px;
+}
+
+/* Update trade item clickable style */
+.trade-item.clickable {
+  transition: all 0.2s;
+}
+
+.trade-item.clickable:hover {
+  border-color: #60a5fa;
+  background-color: #1f1f1f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
