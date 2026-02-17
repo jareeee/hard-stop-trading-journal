@@ -126,9 +126,15 @@ export const TradeLog = () => {
 
     const risk = Math.abs(entry - stop);
     const reward = Math.abs(target - entry);
-    const ratio = reward / risk;
+    const rewardToRisk = reward / risk;
 
-    return `${ratio.toFixed(1).startsWith('2') ? '2' : ratio.toFixed(0)}:1`;
+    if (rewardToRisk >= 1) {
+      const rewardPart = Number.isInteger(rewardToRisk) ? rewardToRisk.toFixed(0) : rewardToRisk.toFixed(1);
+      return `1:${rewardPart}`;
+    }
+
+    const riskPart = Number.isInteger(1 / rewardToRisk) ? (1 / rewardToRisk).toFixed(0) : (1 / rewardToRisk).toFixed(1);
+    return `${riskPart}:1`;
   };
 
   const pad2 = (value: number) => String(value).padStart(2, '0');
