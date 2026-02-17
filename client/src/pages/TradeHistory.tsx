@@ -286,7 +286,7 @@ export const TradeHistory = () => {
   }
 
   return (
-    <div className="session-container">
+    <div className="session-container trade-history-page">
       <div className="session-header">
         <div className="session-header-info">
           <h1 className="session-title">Trade History</h1>
@@ -360,13 +360,19 @@ export const TradeHistory = () => {
                   onClick={() => setExpandedSessionId(isExpanded ? null : session.id)}
                   aria-expanded={isExpanded}
                 >
-                  <span className="trade-history-session-label">Session #{session.id}</span>
-                  <span className={`session-status-badge ${session.status === 'active' ? 'active' : ''}`}>
-                    {statusText}
+                  <span className="trade-history-session-main">
+                    <span className="trade-history-session-label">Session #{session.id}</span>
+                    <span className="trade-history-session-date">{formatDateTime(session.started_at)}</span>
                   </span>
-                  <span className="trade-history-session-date">{formatDateTime(session.started_at)}</span>
-                  <span className="trade-history-session-count">{session.trades.length} trades</span>
-                  {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  <span className="trade-history-session-meta">
+                    <span className={`session-status-badge ${session.status === 'active' ? 'active' : ''}`}>
+                      {statusText}
+                    </span>
+                    <span className="trade-history-session-count">{session.trades.length} trades</span>
+                    <span className="trade-history-chevron">
+                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </span>
+                  </span>
                 </button>
 
                 {isExpanded && (
