@@ -87,9 +87,9 @@ export const TradeLog = () => {
 
   const calculateWarnings = () => {
     const nextWarnings: string[] = [];
-    const entry = Number(entryPrice);
-    const stop = Number(stopLoss);
-    const target = Number(targetPrice);
+    const entry = parseNumericInput(entryPrice);
+    const stop = parseNumericInput(stopLoss);
+    const target = parseNumericInput(targetPrice);
 
     if (entry > 0 && stop > 0 && target > 0) {
       const risk = Math.abs(entry - stop);
@@ -118,9 +118,9 @@ export const TradeLog = () => {
   };
 
   const calculateRiskReward = () => {
-    const entry = Number(entryPrice);
-    const stop = Number(stopLoss);
-    const target = Number(targetPrice);
+    const entry = parseNumericInput(entryPrice);
+    const stop = parseNumericInput(stopLoss);
+    const target = parseNumericInput(targetPrice);
 
     if (!(entry > 0 && stop > 0 && target > 0)) return '0:0';
 
@@ -181,17 +181,17 @@ export const TradeLog = () => {
       return;
     }
 
-    if (!entryPrice || Number(entryPrice) <= 0) {
+    if (!entryPrice || parseNumericInput(entryPrice) <= 0) {
       setError('Entry price must be greater than 0.');
       return;
     }
 
-    if (stopLoss && Number(stopLoss) <= 0) {
+    if (stopLoss && parseNumericInput(stopLoss) <= 0) {
       setError('Stop loss must be greater than 0.');
       return;
     }
 
-    if (targetPrice && Number(targetPrice) <= 0) {
+    if (targetPrice && parseNumericInput(targetPrice) <= 0) {
       setError('Target price must be greater than 0.');
       return;
     }
@@ -209,12 +209,12 @@ export const TradeLog = () => {
         trade: {
           asset: asset.toUpperCase().replace(/\//g, ''),
           direction,
-          entry_price: Number(entryPrice),
-          stop_loss: stopLoss ? Number(stopLoss) : undefined,
-          target_price: targetPrice ? Number(targetPrice) : undefined,
+          entry_price: parseNumericInput(entryPrice),
+          stop_loss: stopLoss ? parseNumericInput(stopLoss) : undefined,
+          target_price: targetPrice ? parseNumericInput(targetPrice) : undefined,
           strategy_id: strategyId ? parseInt(strategyId, 10) : undefined,
           notes: notes || undefined,
-          quantity: quantity ? Number(quantity) : undefined
+          quantity: quantity ? parseNumericInput(quantity) : undefined
         }
       });
 
@@ -334,22 +334,22 @@ export const TradeLog = () => {
             <div className="form-group">
               <label className="input-label">Target price</label>
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="numeric"
                 className="input-field"
                 value={targetPrice}
-                onChange={(e) => setTargetPrice(e.target.value)}
+                onChange={(e) => setTargetPrice(formatThousandDots(e.target.value))}
                 placeholder="0.00"
               />
             </div>
             <div className="form-group">
               <label className="input-label">Stop loss</label>
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="numeric"
                 className="input-field"
                 value={stopLoss}
-                onChange={(e) => setStopLoss(e.target.value)}
+                onChange={(e) => setStopLoss(formatThousandDots(e.target.value))}
                 placeholder="0.00"
               />
             </div>
@@ -405,22 +405,22 @@ export const TradeLog = () => {
             <div className="form-group">
               <label className="input-label">Quantity</label>
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="numeric"
                 className="input-field"
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e) => setQuantity(formatThousandDots(e.target.value))}
                 placeholder="0.00"
               />
             </div>
             <div className="form-group">
               <label className="input-label">Entry price</label>
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="numeric"
                 className="input-field"
                 value={entryPrice}
-                onChange={(e) => setEntryPrice(e.target.value)}
+                onChange={(e) => setEntryPrice(formatThousandDots(e.target.value))}
                 placeholder="0.00"
                 required
               />
@@ -528,3 +528,13 @@ export const TradeLog = () => {
     </div>
   );
 };
+  const formatThousandDots = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return '';
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const parseNumericInput = (value: string) => {
+    if (!value) return 0;
+    return Number(value.replace(/\./g, '').replace(',', '.'));
+  };
