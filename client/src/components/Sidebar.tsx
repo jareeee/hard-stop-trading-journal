@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { authService } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Clock, Settings2, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Settings2, User, LogOut, Play, BookOpen } from 'lucide-react';
 
 export const Sidebar = () => {
   const navigate = useNavigate();
@@ -20,7 +20,8 @@ export const Sidebar = () => {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { path: '/sessions', label: 'Sessions', icon: <Clock size={20} /> },
+    { path: '/session', label: 'Session', icon: <Play size={20} /> },
+    { path: '/trade-log', label: 'Trade Log', icon: <BookOpen size={20} /> },
     { path: '/rule-configuration', label: 'Rules Setup', icon: <Settings2 size={20} /> },
     { path: '/settings', label: 'Settings', icon: <User size={20} /> },
   ];
@@ -55,3 +56,4 @@ export const Sidebar = () => {
     </aside>
   );
 };
+

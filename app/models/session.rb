@@ -2,6 +2,8 @@ class Session < ApplicationRecord
   belongs_to :user
   belongs_to :rule, optional: true
   has_many :trades, dependent: :destroy
+  has_many :session_strategies, dependent: :destroy
+  has_many :strategies, through: :session_strategies
 
   validates :status, presence: true, inclusion: { in: %w[active ended] }
   validates :started_at, presence: true
@@ -9,6 +11,32 @@ class Session < ApplicationRecord
   # Helper to find or create active session for user
   def self.current_for(user)
     user.sessions.where(status: "active").order(created_at: :desc).first
+  end
+
+  # Check if session has reached any limits
+  def limit_reached?
+    return false unless rule
+
+    stats_data = stats
+    return false unless stats_data
+
+    # Check trade limit
+    if stats_data[:trades][:max] && stats_data[:trades][:remaining] == 0
+      return true
+    end
+
+    # Check drawdown limit
+    if stats_data[:drawdown][:max] && stats_data[:drawdown][:remaining] &&
+       stats_data[:drawdown][:remaining] <= 0
+      return true
+    end
+
+    # Check consecutive loss limit
+    if stats_data[:losses][:max] && stats_data[:losses][:remaining] == 0
+      return true
+    end
+
+    false
   end
 
   def stats
@@ -38,7 +66,7 @@ class Session < ApplicationRecord
 
     warnings = []
     warnings << "Approaching trade limit" if remaining_trades && remaining_trades <= 1
-    warnings << "High drawdown warning" if remaining_drawdown && remaining_drawdown <= (max_drawdown * 0.2)
+    warnings << "High drawdown warning" if remaining_drawdown && max_drawdown && remaining_drawdown <= (max_drawdown * 0.2)
     warnings << "Risk of consecutive loss limit" if remaining_losses && remaining_losses <= 1
 
     {

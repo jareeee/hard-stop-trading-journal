@@ -29,8 +29,20 @@ export const RuleConfiguration = () => {
     const loadStrategies = async () => {
         try {
             const response = await strategyService.getAll();
+            console.log('Strategies API response:', response);
+            
             if (response.data) {
-                setStrategies(response.data);
+                // Parse JSONAPI format: response.data is array of { id, type, attributes }
+                const parsedStrategies = response.data.map((s: any) => ({
+                    id: parseInt(s.id),
+                    name: s.attributes.name,
+                    description: s.attributes.description,
+                    is_active: s.attributes.is_active,
+                    created_at: s.attributes.created_at
+                }));
+                
+                console.log('Parsed strategies:', parsedStrategies);
+                setStrategies(parsedStrategies);
             }
         } catch (err) {
             console.error('Failed to load strategies:', err);
@@ -67,8 +79,17 @@ export const RuleConfiguration = () => {
                 }
             });
             
-            if (response.data && response.data.attributes) {
-                setStrategies([...strategies, response.data.attributes]);
+            if (response.data) {
+                // Parse JSONAPI format
+                const newStrategyData = {
+                    id: parseInt(response.data.id),
+                    name: response.data.attributes.name,
+                    description: response.data.attributes.description,
+                    is_active: response.data.attributes.is_active,
+                    created_at: response.data.attributes.created_at
+                };
+                
+                setStrategies([...strategies, newStrategyData]);
                 setNewStrategy('');
             }
         } catch (err) {
