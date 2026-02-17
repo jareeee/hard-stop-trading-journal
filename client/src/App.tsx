@@ -7,8 +7,18 @@ import { TradeLog } from './pages/TradeLog';
 import { TradeHistory } from './pages/TradeHistory';
 import { Settings } from './pages/Settings';
 import { Session } from './pages/Session';
+import { authService } from './services/auth';
 
 import { Layout } from './components/Layout';
+
+function ProtectedLayout() {
+  if (!authService.hasValidSessionToken()) {
+    authService.clearToken();
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Layout />;
+}
 
 function App() {
   return (
@@ -17,7 +27,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         
-        <Route element={<Layout />}>
+        <Route element={<ProtectedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/session" element={<Session />} />
           <Route path="/sessions" element={<TradeHistory />} />
