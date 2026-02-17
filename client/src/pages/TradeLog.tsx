@@ -140,13 +140,16 @@ export const TradeLog = () => {
     return `${day}/${month}/${year}, ${time}`;
   };
 
-  const setNowDateTime = () => {
+  const setNowDateTime = (close = false) => {
     const now = new Date();
     const currentDate = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     const currentTime = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
     setSelectedDate(currentDate);
     setSelectedTime(currentTime);
     setDatetime(toDateTimeDisplay(currentDate, currentTime));
+    if (close) {
+      setIsDateTimePickerOpen(false);
+    }
   };
 
   const handleDateChange = (nextDate: string) => {
@@ -395,7 +398,7 @@ export const TradeLog = () => {
                       />
                     </div>
                     <div className="date-time-picker-actions">
-                      <button type="button" className="btn-secondary" onClick={setNowDateTime}>Now</button>
+                      <button type="button" className="btn-secondary" onClick={() => setNowDateTime(true)}>Now</button>
                       <button type="button" className="btn-primary" onClick={() => setIsDateTimePickerOpen(false)}>Done</button>
                     </div>
                   </div>
