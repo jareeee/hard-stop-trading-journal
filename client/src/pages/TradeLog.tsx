@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, AlertTriangle, TrendingUp, TrendingDown, Calendar, Play } from 'lucide-react';
 import { tradeService } from '../services/trade';
@@ -18,6 +18,9 @@ export const TradeLog = () => {
   const [entryPrice, setEntryPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [datetime, setDatetime] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [isDateTimePickerOpen, setIsDateTimePickerOpen] = useState(false);
   const [strategyId, setStrategyId] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -31,6 +34,7 @@ export const TradeLog = () => {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const dateTimePickerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     void loadInitialData();
@@ -39,6 +43,19 @@ export const TradeLog = () => {
   useEffect(() => {
     calculateWarnings();
   }, [entryPrice, stopLoss, targetPrice, strategyId, stats.trades_taken, currentSession?.rule?.max_trades_per_session]);
+
+  useEffect(() => {
+    if (!isDateTimePickerOpen) return;
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (dateTimePickerRef.current && !dateTimePickerRef.current.contains(event.target as Node)) {
+        setIsDateTimePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isDateTimePickerOpen]);
 
   const loadInitialData = async () => {
     try {
@@ -114,6 +131,41 @@ export const TradeLog = () => {
     return `${ratio.toFixed(1).startsWith('2') ? '2' : ratio.toFixed(0)}:1`;
   };
 
+  const pad2 = (value: number) => String(value).padStart(2, '0');
+
+  const toDateTimeDisplay = (date: string, time: string) => {
+    if (!date || !time) return '';
+    const [year, month, day] = date.split('-');
+    if (!year || !month || !day) return '';
+    return `${day}/${month}/${year}, ${time}`;
+  };
+
+  const setNowDateTime = () => {
+    const now = new Date();
+    const currentDate = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+    const currentTime = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    setSelectedDate(currentDate);
+    setSelectedTime(currentTime);
+    setDatetime(toDateTimeDisplay(currentDate, currentTime));
+  };
+
+  const handleDateChange = (nextDate: string) => {
+    setSelectedDate(nextDate);
+    setDatetime(toDateTimeDisplay(nextDate, selectedTime));
+  };
+
+  const handleTimeChange = (nextTime: string) => {
+    setSelectedTime(nextTime);
+    setDatetime(toDateTimeDisplay(selectedDate, nextTime));
+  };
+
+  const openDateTimePicker = () => {
+    if (!selectedDate || !selectedTime) {
+      setNowDateTime();
+    }
+    setIsDateTimePickerOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -172,10 +224,13 @@ export const TradeLog = () => {
       setEntryPrice('');
       setQuantity('');
       setDatetime('');
+      setSelectedDate('');
+      setSelectedTime('');
+      setIsDateTimePickerOpen(false);
       setStrategyId('');
       setNotes('');
 
-      await loadInitialData();
+      navigate('/session');
     } catch (err: any) {
       const status = err?.response?.status;
       if (status === 401) {
@@ -303,15 +358,48 @@ export const TradeLog = () => {
           <div className="form-row" style={{ marginTop: '1rem' }}>
             <div className="form-group">
               <label className="input-label">Date/Time</label>
-              <div className="input-field-wrapper">
+              <div className="input-field-wrapper" ref={dateTimePickerRef}>
                 <input
                   type="text"
                   className="input-field"
                   value={datetime}
                   placeholder="26/01/2026, 19:58"
-                  onChange={(e) => setDatetime(e.target.value)}
+                  onClick={openDateTimePicker}
+                  readOnly
                 />
-                <Calendar className="input-icon" size={18} />
+                <button
+                  type="button"
+                  className="input-icon-btn"
+                  onClick={openDateTimePicker}
+                  aria-label="Open date and time picker"
+                >
+                  <Calendar className="input-icon" size={18} />
+                </button>
+                {isDateTimePickerOpen && (
+                  <div className="date-time-picker-popover">
+                    <h4 className="date-time-picker-title">Date and Time Picker</h4>
+                    <div className="date-time-picker-grid">
+                      <label className="input-label">Date</label>
+                      <input
+                        type="date"
+                        className="input-field"
+                        value={selectedDate}
+                        onChange={(e) => handleDateChange(e.target.value)}
+                      />
+                      <label className="input-label">Time</label>
+                      <input
+                        type="time"
+                        className="input-field"
+                        value={selectedTime}
+                        onChange={(e) => handleTimeChange(e.target.value)}
+                      />
+                    </div>
+                    <div className="date-time-picker-actions">
+                      <button type="button" className="btn-secondary" onClick={setNowDateTime}>Now</button>
+                      <button type="button" className="btn-primary" onClick={() => setIsDateTimePickerOpen(false)}>Done</button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             <div className="form-group">
