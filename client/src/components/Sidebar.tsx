@@ -21,7 +21,7 @@ export const Sidebar = () => {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/session', label: 'Session', icon: <Play size={20} /> },
-    { path: '/trade-log', label: 'Trade Log', icon: <BookOpen size={20} /> },
+    { path: '/trade-history', label: 'Trade History', icon: <BookOpen size={20} /> },
     { path: '/rule-configuration', label: 'Rules Setup', icon: <Settings2 size={20} /> },
     { path: '/settings', label: 'Settings', icon: <User size={20} /> },
   ];
@@ -56,4 +56,3 @@ export const Sidebar = () => {
     </aside>
   );
 };
-

@@ -3,7 +3,7 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Dashboard } from './pages/Dashboard';
 import { RuleConfiguration } from './pages/RuleConfiguration';
-import { TradeLog } from './pages/TradeLog';
+import { TradeHistory } from './pages/TradeHistory';
 import { Settings } from './pages/Settings';
 import { Session } from './pages/Session';
 
@@ -16,12 +16,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         
-        {/* Protected Routes inside Layout */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/session" element={<Session />} />
-          <Route path="/sessions" element={<TradeLog />} />
-          <Route path="/trade-log" element={<TradeLog />} />
+          <Route path="/sessions" element={<TradeHistory />} />
+          <Route path="/trade-history" element={<TradeHistory />} />
+          <Route path="/trade-log" element={<Navigate to="/trade-history" replace />} />
           <Route path="/rule-configuration" element={<RuleConfiguration />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
@@ -34,4 +34,3 @@ function App() {
 }
 
 export default App;
-

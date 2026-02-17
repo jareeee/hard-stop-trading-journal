@@ -258,7 +258,7 @@ export const Session = () => {
   };
 
   const handleLogTrade = () => {
-    navigate('/trade-log');
+    navigate('/trade-history');
   };
 
   const getSelectedRule = (): Rule | null => {
@@ -533,8 +533,8 @@ export const Session = () => {
             className="btn-session-action primary"
             onClick={handleLogTrade}
           >
-            <Plus size={20} />
-            Log New Trade
+            <History size={20} />
+            Trade History
           </button>
           <button 
             className="btn-session-action danger"
