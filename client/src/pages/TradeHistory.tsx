@@ -349,9 +349,10 @@ export const TradeHistory = () => {
 
       {!error && sessions.length > 0 && (
         <div className="trade-history-list">
-          {sessions.map((session) => {
+          {sessions.map((session, index) => {
             const isExpanded = expandedSessionId === session.id;
             const statusText = session.status === 'active' ? 'ACTIVE' : 'ENDED';
+            const sessionNumber = sessions.length - index;
             return (
               <section key={session.id} className="session-trades-card">
                 <button
@@ -361,7 +362,7 @@ export const TradeHistory = () => {
                   aria-expanded={isExpanded}
                 >
                   <span className="trade-history-session-main">
-                    <span className="trade-history-session-label">Session #{session.id}</span>
+                    <span className="trade-history-session-label">Session #{sessionNumber}</span>
                     <span className="trade-history-session-date">{formatDateTime(session.started_at)}</span>
                   </span>
                   <span className="trade-history-session-meta">
