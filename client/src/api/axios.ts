@@ -35,12 +35,10 @@ api.interceptors.response.use(
   (error) => {
     // Handle global errors, e.g., 401 Unauthorized
     if (error.response && error.response.status === 401) {
-      // Clear local storage and correct state if necessary
-       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
-           localStorage.removeItem('token');
-           // Optional: Redirect to login
-           // window.location.href = '/login';
-       }
+      localStorage.removeItem('token');
+      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+        window.location.replace('/login');
+      }
     }
     return Promise.reject(error);
   }

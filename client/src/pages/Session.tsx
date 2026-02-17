@@ -146,6 +146,31 @@ export const Session = () => {
     }
   };
 
+  const setActiveSessionFromPayload = (session: any): SessionData => {
+    const sessionData: SessionData = {
+      id: parseInt(session.id),
+      status: session.attributes.status,
+      started_at: session.attributes.started_at,
+      ended_at: session.attributes.ended_at,
+      trade_count: session.attributes.trade_count || 0,
+      rule: session.attributes.rule,
+      strategies: session.attributes.strategies || [],
+      trades: session.attributes.trades || []
+    };
+    setCurrentSession(sessionData);
+    return sessionData;
+  };
+
+  const refreshActiveSession = async (): Promise<SessionData | null> => {
+    const sessions = await sessionService.getAll();
+    const activeSession = sessions?.data?.find((s: any) => s.attributes?.status === 'active');
+    if (!activeSession) {
+      setCurrentSession(null);
+      return null;
+    }
+    return setActiveSessionFromPayload(activeSession);
+  };
+
   const handleStartSession = async () => {
     if (!confirmed) {
       setError('Please confirm you have read and agreed to the session rules');
@@ -229,26 +254,13 @@ export const Session = () => {
         } as any
       });
 
-      // Reload session data to get updated trades
-      const sessions = await sessionService.getAll();
-      const activeSession = sessions?.data?.find((s: any) => s.attributes?.status === 'active');
-      
-      if (activeSession) {
-        setCurrentSession({
-          id: parseInt(activeSession.id),
-          status: activeSession.attributes.status,
-          started_at: activeSession.attributes.started_at,
-          ended_at: activeSession.attributes.ended_at,
-          trade_count: activeSession.attributes.trade_count || 0,
-          rule: activeSession.attributes.rule,
-          strategies: activeSession.attributes.strategies || [],
-          trades: activeSession.attributes.trades || []
-        });
-      }
+      const activeSession = await refreshActiveSession();
 
       // Close modal and reload stats
       handleCloseModal();
-      await loadSessionStats(currentSession.id);
+      if (activeSession) {
+        await loadSessionStats(activeSession.id);
+      }
     } catch (err) {
       console.error('Failed to close trade:', err);
       setError('Failed to close trade');
@@ -258,6 +270,10 @@ export const Session = () => {
   };
 
   const handleLogTrade = () => {
+    navigate('/trade-log');
+  };
+
+  const handleOpenTradeHistory = () => {
     navigate('/trade-history');
   };
 
@@ -532,6 +548,13 @@ export const Session = () => {
           <button 
             className="btn-session-action primary"
             onClick={handleLogTrade}
+          >
+            <Plus size={20} />
+            Log Trade
+          </button>
+          <button 
+            className="btn-session-action primary"
+            onClick={handleOpenTradeHistory}
           >
             <History size={20} />
             Trade History

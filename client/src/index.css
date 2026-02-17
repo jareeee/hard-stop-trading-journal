@@ -140,6 +140,26 @@ a {
   cursor: pointer;
 }
 
+.input-icon-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.input-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .btn-primary {
   background-color: var(--primary-color);
   color: #000;
@@ -525,6 +545,50 @@ a {
   border-radius: 6px;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
+}
+
+.date-time-picker-popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  width: min(360px, 100%);
+  background: #141414;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem;
+  z-index: 30;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.date-time-picker-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.9rem;
+}
+
+.date-time-picker-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.date-time-picker-popover input[type="date"]::-webkit-calendar-picker-indicator,
+.date-time-picker-popover input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2.1);
+  opacity: 1;
+  cursor: pointer;
+}
+
+.date-time-picker-popover input[type="date"]::-webkit-datetime-edit,
+.date-time-picker-popover input[type="time"]::-webkit-datetime-edit {
+  color: var(--text-primary);
+}
+
+.date-time-picker-actions {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .btn-trade {
