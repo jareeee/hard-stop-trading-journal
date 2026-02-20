@@ -30,6 +30,7 @@ class SessionSerializer
         asset: trade.asset,
         direction: trade.direction,
         entry_price: trade.entry_price,
+        quantity: trade.quantity,
         stop_loss: trade.stop_loss,
         target_price: trade.target_price,
         close_price: trade.close_price,

@@ -195,6 +195,11 @@ export const TradeLog = () => {
       return;
     }
 
+    if (!quantity || parseNumericInput(quantity) <= 0) {
+      setError('Quantity must be greater than 0.');
+      return;
+    }
+
     if (stopLoss && parseNumericInput(stopLoss) <= 0) {
       setError('Stop loss must be greater than 0.');
       return;
@@ -420,6 +425,7 @@ export const TradeLog = () => {
                 value={quantity}
                 onChange={(e) => setQuantity(formatThousandDots(e.target.value))}
                 placeholder="0.00"
+                required
               />
             </div>
             <div className="form-group">
