@@ -10,15 +10,27 @@ export interface DashboardStats {
     pnl_vs_last_month_percent: number;
   };
   profit_factor: {
-    value: number;
+    value: number | null;
+    display: string;
     optimal: number;
-    percent_of_target: number;
+    percent_of_target: number | null;
+    status: 'up' | 'down' | 'neutral';
+    note: string | null;
+    samples: {
+      wins: number;
+      losses: number;
+    };
   };
   realized_risk_reward: {
-    value: number;
-    historical_avg: number;
-    deviation_percent: number;
-    status: 'up' | 'down';
+    value: number | null;
+    historical_avg: number | null;
+    deviation_percent: number | null;
+    status: 'up' | 'down' | 'neutral';
+    note: string | null;
+    samples: {
+      wins: number;
+      losses: number;
+    };
   };
   sessions: {
     active: boolean;

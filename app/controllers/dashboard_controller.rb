@@ -55,18 +55,57 @@ class DashboardController < ApplicationController
   def calculate_profit_factor(trades)
     closed_trades = closed_trades_for(trades)
     pnl_values = closed_trades.map { |trade| effective_pnl_for(trade) }
+    winning_values = pnl_values.select(&:positive?)
+    losing_values = pnl_values.select(&:negative?)
 
-    gross_profit = pnl_values.select(&:positive?).sum
-    gross_loss = pnl_values.select(&:negative?).sum.abs
-
-    profit_factor = gross_loss > 0 ? (gross_profit / gross_loss).round(2) : 0
+    gross_profit = winning_values.sum
+    gross_loss = losing_values.sum.abs
     optimal_target = 2.0
+
+    if pnl_values.empty?
+      return {
+        value: nil,
+        display: "N/A",
+        optimal: optimal_target,
+        percent_of_target: nil,
+        status: "neutral",
+        note: "Need closed trades to calculate profit factor",
+        samples: {
+          wins: 0,
+          losses: 0
+        }
+      }
+    end
+
+    if gross_loss.zero? && gross_profit.positive?
+      return {
+        value: nil,
+        display: "∞",
+        optimal: optimal_target,
+        percent_of_target: nil,
+        status: "up",
+        note: "No losing trades yet",
+        samples: {
+          wins: winning_values.size,
+          losses: losing_values.size
+        }
+      }
+    end
+
+    profit_factor = gross_loss.positive? ? (gross_profit / gross_loss).round(2) : 0.0
     percent_of_target = ((profit_factor / optimal_target) * 100).round(0)
 
     {
       value: profit_factor,
+      display: format("%.2f", profit_factor),
       optimal: optimal_target,
-      percent_of_target: percent_of_target
+      percent_of_target: percent_of_target,
+      status: profit_factor >= optimal_target ? "up" : "down",
+      note: nil,
+      samples: {
+        wins: winning_values.size,
+        losses: losing_values.size
+      }
     }
   end
 
@@ -76,20 +115,39 @@ class DashboardController < ApplicationController
     winning_values = pnl_values.select(&:positive?)
     losing_values = pnl_values.select(&:negative?).map(&:abs)
 
-    avg_win = winning_values.any? ? (winning_values.sum / winning_values.size) : 0
-    avg_loss = losing_values.any? ? (losing_values.sum / losing_values.size) : 0
+    if winning_values.empty? || losing_values.empty?
+      return {
+        value: nil,
+        historical_avg: nil,
+        deviation_percent: nil,
+        status: "neutral",
+        note: "Need at least 1 winning and 1 losing trade",
+        samples: {
+          wins: winning_values.size,
+          losses: losing_values.size
+        }
+      }
+    end
 
-    rr_ratio = avg_loss > 0 ? (avg_win / avg_loss).round(1) : 0
+    avg_win = winning_values.sum / winning_values.size
+    avg_loss = losing_values.sum / losing_values.size
 
-    # Calculate historical average (could be stored/cached)
-    historical_avg = 2.0 # This could be calculated from all-time data
-    deviation_percent = historical_avg > 0 ? (((rr_ratio - historical_avg) / historical_avg) * 100).round(1) : 0
+    rr_ratio = (avg_win / avg_loss).round(1)
+
+    # Placeholder baseline until a true historical baseline is implemented.
+    historical_avg = 2.0
+    deviation_percent = historical_avg.positive? ? (((rr_ratio - historical_avg) / historical_avg) * 100).round(1) : nil
 
     {
       value: rr_ratio,
       historical_avg: historical_avg,
       deviation_percent: deviation_percent,
-      status: deviation_percent < 0 ? "down" : "up"
+      status: deviation_percent&.negative? ? "down" : "up",
+      note: nil,
+      samples: {
+        wins: winning_values.size,
+        losses: losing_values.size
+      }
     }
   end
 

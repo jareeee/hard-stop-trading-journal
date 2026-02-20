@@ -768,6 +768,10 @@ select.input-field {
   color: var(--color-danger);
 }
 
+.trend-neutral {
+  color: var(--color-text-secondary);
+}
+
 /* Dashboard Row */
 .dashboard-row {
   display: grid;

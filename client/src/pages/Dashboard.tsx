@@ -203,22 +203,30 @@ export const Dashboard = () => {
                         <span className="metric-label">PROFIT FACTOR</span>
                     </div>
                     <div className="metric-value">
-                        {Number(stats.profit_factor.value).toFixed(2)}
+                        {stats.profit_factor.display}
                     </div>
                     <div className="metric-footer">
                         <span>Optimal: &gt;{Number(stats.profit_factor.optimal).toFixed(1)}</span>
-                        <span style={{ color: 'var(--color-primary)' }}>
-                            {stats.profit_factor.percent_of_target}% of Target
-                        </span>
-                        <div className="progress-bar">
-                            <div 
-                                className="progress-fill" 
-                                style={{ 
-                                    width: `${Math.min(stats.profit_factor.percent_of_target, 100)}%`,
-                                    backgroundColor: 'var(--color-primary)'
-                                }}
-                            />
-                        </div>
+                        {stats.profit_factor.percent_of_target === null ? (
+                            <span className="trend-neutral">
+                                {stats.profit_factor.note || 'Need more closed trades to calculate profit factor'}
+                            </span>
+                        ) : (
+                            <>
+                                <span style={{ color: 'var(--color-primary)' }}>
+                                    {stats.profit_factor.percent_of_target}% of Target
+                                </span>
+                                <div className="progress-bar">
+                                    <div
+                                        className="progress-fill"
+                                        style={{
+                                            width: `${Math.min(stats.profit_factor.percent_of_target, 100)}%`,
+                                            backgroundColor: 'var(--color-primary)'
+                                        }}
+                                    />
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -228,14 +236,22 @@ export const Dashboard = () => {
                         <span className="metric-label">REALIZED RISK:REWARD</span>
                     </div>
                     <div className="metric-value">
-                        1:{Number(stats.realized_risk_reward.value).toFixed(1)}
+                        {stats.realized_risk_reward.value === null
+                            ? 'N/A'
+                            : `1:${Number(stats.realized_risk_reward.value).toFixed(1)}`}
                     </div>
                     <div className="metric-footer">
-                        <span className={stats.realized_risk_reward.status === 'up' ? 'trend-up' : 'trend-down'}>
-                            {stats.realized_risk_reward.status === 'up' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                            {' '}
-                            {stats.realized_risk_reward.status === 'up' ? 'Up' : 'Down'} {Math.abs(stats.realized_risk_reward.deviation_percent)}% from historical average
-                        </span>
+                        {stats.realized_risk_reward.status === 'neutral' || stats.realized_risk_reward.deviation_percent === null ? (
+                            <span className="trend-neutral">
+                                {stats.realized_risk_reward.note || 'Need more closed trades to calculate realized R:R'}
+                            </span>
+                        ) : (
+                            <span className={stats.realized_risk_reward.status === 'up' ? 'trend-up' : 'trend-down'}>
+                                {stats.realized_risk_reward.status === 'up' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                                {' '}
+                                {stats.realized_risk_reward.status === 'up' ? 'Up' : 'Down'} {Math.abs(stats.realized_risk_reward.deviation_percent)}% from historical average
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

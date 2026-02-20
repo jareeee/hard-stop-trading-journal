@@ -7,7 +7,12 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "http://localhost:5173"
+    allowed_origins = ENV.fetch("CORS_ALLOWED_ORIGINS", "")
+      .split(",")
+      .map(&:strip)
+      .reject(&:empty?)
+
+    origins(*allowed_origins, /\Ahttp:\/\/localhost:\d+\z/, /\Ahttp:\/\/127\.0\.0\.1:\d+\z/)
 
     resource "*",
       headers: :any,
