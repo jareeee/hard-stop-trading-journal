@@ -20,8 +20,8 @@ class DashboardController < ApplicationController
   private
 
   def calculate_account_balance(trades)
-    closed_trades = trades.where.not(closed_at: nil)
-    total_pnl = closed_trades.sum(:pnl_net) || 0
+    closed_trades = closed_trades_for(trades)
+    total_pnl = closed_trades.sum { |trade| effective_pnl_for(trade) }
 
     # Get current balance from balance_transactions
     current_balance = BalanceTransaction.current_balance_for(current_user)
@@ -37,7 +37,9 @@ class DashboardController < ApplicationController
 
     # Calculate change vs last month (optional - can be expanded)
     last_month_start = 1.month.ago.beginning_of_month
-    pnl_vs_last_month = closed_trades.where("closed_at >= ?", last_month_start).sum(:pnl_net) || 0
+    pnl_vs_last_month = closed_trades
+      .select { |trade| trade.closed_at.present? && trade.closed_at >= last_month_start }
+      .sum { |trade| effective_pnl_for(trade) }
     pnl_vs_last_month_percent = starting_balance > 0 ? ((pnl_vs_last_month / starting_balance) * 100).round(2) : 0
 
     {
@@ -51,13 +53,11 @@ class DashboardController < ApplicationController
   end
 
   def calculate_profit_factor(trades)
-    closed_trades = trades.where.not(closed_at: nil)
+    closed_trades = closed_trades_for(trades)
+    pnl_values = closed_trades.map { |trade| effective_pnl_for(trade) }
 
-    winning_trades = closed_trades.where("pnl_net > 0")
-    losing_trades = closed_trades.where("pnl_net < 0")
-
-    gross_profit = winning_trades.sum(:pnl_net) || 0
-    gross_loss = losing_trades.sum(:pnl_net).abs || 0
+    gross_profit = pnl_values.select(&:positive?).sum
+    gross_loss = pnl_values.select(&:negative?).sum.abs
 
     profit_factor = gross_loss > 0 ? (gross_profit / gross_loss).round(2) : 0
     optimal_target = 2.0
@@ -71,13 +71,13 @@ class DashboardController < ApplicationController
   end
 
   def calculate_realized_rr(trades)
-    closed_trades = trades.where.not(closed_at: nil)
+    closed_trades = closed_trades_for(trades)
+    pnl_values = closed_trades.map { |trade| effective_pnl_for(trade) }
+    winning_values = pnl_values.select(&:positive?)
+    losing_values = pnl_values.select(&:negative?).map(&:abs)
 
-    winning_trades = closed_trades.where("pnl_net > 0")
-    losing_trades = closed_trades.where("pnl_net < 0")
-
-    avg_win = winning_trades.any? ? (winning_trades.sum(:pnl_net) / winning_trades.count).abs : 0
-    avg_loss = losing_trades.any? ? (losing_trades.sum(:pnl_net) / losing_trades.count).abs : 0
+    avg_win = winning_values.any? ? (winning_values.sum / winning_values.size) : 0
+    avg_loss = losing_values.any? ? (losing_values.sum / losing_values.size) : 0
 
     rr_ratio = avg_loss > 0 ? (avg_win / avg_loss).round(1) : 0
 
@@ -110,7 +110,7 @@ class DashboardController < ApplicationController
   end
 
   def calculate_performance_curve(trades)
-    closed_trades = trades.where.not(closed_at: nil).order(closed_at: :asc)
+    closed_trades = closed_trades_for(trades)
 
     starting_balance = BalanceTransaction.starting_balance_for(current_user)
     cumulative_balance = starting_balance
@@ -125,7 +125,7 @@ class DashboardController < ApplicationController
     }
 
     closed_trades.each do |trade|
-      cumulative_balance += (trade.pnl_net || 0)
+      cumulative_balance += effective_pnl_for(trade)
 
       data_points << {
         date: trade.closed_at.to_date,
@@ -142,7 +142,7 @@ class DashboardController < ApplicationController
     data_points.each do |point|
       if point[:equity] > peak
         peak = point[:equity]
-      else
+      elsif peak.positive?
         drawdown = ((peak - point[:equity]) / peak * 100).round(2)
         if drawdown > max_drawdown
           max_drawdown = drawdown
@@ -156,5 +156,18 @@ class DashboardController < ApplicationController
       max_drawdown: max_drawdown,
       max_drawdown_date: max_drawdown_date
     }
+  end
+
+  def closed_trades_for(trades)
+    trades.where.not(closed_at: nil).order(closed_at: :asc).to_a
+  end
+
+  def effective_pnl_for(trade)
+    return trade.pnl_net.to_f if trade.pnl_net.present?
+    return 0.0 unless trade.entry_price.present? && trade.close_price.present? && trade.direction.present? && trade.quantity.present?
+
+    price_delta = trade.close_price.to_d - trade.entry_price.to_d
+    gross_pnl = (trade.direction == "short" ? -price_delta : price_delta) * trade.quantity.to_d
+    (gross_pnl - trade.fee.to_d).round(2).to_f
   end
 end

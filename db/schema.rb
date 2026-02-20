@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_28_161007) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_20_011000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,6 +93,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_28_161007) do
     t.datetime "closed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "quantity", precision: 20, scale: 8
     t.index ["asset"], name: "index_trades_on_asset"
     t.index ["closed_at"], name: "index_trades_on_closed_at"
     t.index ["direction"], name: "index_trades_on_direction"

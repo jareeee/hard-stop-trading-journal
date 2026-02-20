@@ -55,7 +55,7 @@ class TradesController < ApplicationController
   end
 
   def trade_params
-    params.require(:trade).permit(:asset, :direction, :entry_price, :stop_loss,
+    params.require(:trade).permit(:asset, :direction, :entry_price, :quantity, :stop_loss,
                                   :target_price, :close_price, :risk_percent,
                                   :strategy_id, :result, :closed_at)
   end
